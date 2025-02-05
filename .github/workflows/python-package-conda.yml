@@ -17,10 +17,13 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests loguru
+        shell: bash
 
       - name: Run subdomain scan
-        run: python c.py # 你的脚本名称
+        run: python c.py
+        shell: bash
+        continue-on-error: true  # 即使脚本失败也继续执行
 
       - name: Create Release
         id: create_release
@@ -35,6 +38,7 @@ jobs:
             See attached files for details.
           draft: false
           prerelease: false
+        if: success()  # 只有在之前的步骤成功时才执行
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
@@ -45,6 +49,7 @@ jobs:
           asset_path: ip.txt
           asset_name: ip.txt
           asset_content_type: text/plain
+        if: success()
 
       - name: Upload Release Asset 2
         uses: actions/upload-release-asset@v1
@@ -55,3 +60,4 @@ jobs:
           asset_path: ip2.txt
           asset_name: ip2.txt
           asset_content_type: text/plain
+        if: success()
