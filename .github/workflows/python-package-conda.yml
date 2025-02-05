@@ -1,0 +1,57 @@
+name: Scan and Release
+
+on:
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run subdomain scan
+        run: python c.py # 你的脚本名称
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 这是必须的
+        with:
+          tag_name: scan-results-${{ github.run_number }}
+          release_name: Scan Results - ${{ github.run_number }}
+          body: |
+            Subdomain scan results.
+            See attached files for details.
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ip.txt
+          asset_name: ip.txt
+          asset_content_type: text/plain
+
+      - name: Upload Release Asset 2
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ip2.txt
+          asset_name: ip2.txt
+          asset_content_type: text/plain
