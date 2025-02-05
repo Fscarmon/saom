@@ -8,10 +8,11 @@ from loguru import logger
 logger.add(lambda msg: print(msg, end=""), format="{time} {level} {message}")
 
 def generate_subdomain():
-    """生成包含 UUID 和指定区域的子域名"""
-    uuid_str = str(uuid.uuid4())  # 生成 UUID
-    region = "e1-us-east-azure"  # 指定区域
-    return f"{uuid_str}.{region}.choreoapps.dev"
+    """生成以 .choreoapps.dev 结尾，前缀为 3 到 6 个随机字母数字组合（大小写随机）的域名"""
+    prefix_length = random.randint(3, 6)  # 随机生成 3 到 6 的数字
+    characters = string.ascii_letters + string.digits  # 所有字母（大小写）和数字
+    prefix = ''.join(random.choice(characters) for _ in range(prefix_length))  # 生成随机前缀
+    return f"{prefix}.choreoapps.dev"
 
 def check_status(url):
     """检查 URL 的状态码"""
