@@ -2,10 +2,9 @@ import requests
 import random
 import string
 import uuid
-import threading  # 导入 threading 模块
-from loguru import logger  # 导入 loguru
+import threading
+from loguru import logger
 
-# 将 loguru 日志重定向到标准输出，确保能被 GitHub Actions 捕获
 logger.add(lambda msg: print(msg, end=""), format="{time} {level} {message}")
 
 def generate_subdomain():
@@ -18,43 +17,49 @@ def check_status(url):
     """检查 URL 的状态码"""
     try:
         response = requests.get(url, timeout=5)
-        logger.debug(f"URL: {url}, Status Code: {response.status_code}")  # 使用 logger 输出调试信息
+        logger.debug(f"URL: {url}, Status Code: {response.status_code}")
         return response.status_code
     except requests.RequestException as e:
         logger.warning(f"Request failed for {url}: {e}")
         return None
 
-def worker(ip_file, found_ips):
+def worker(ip_file, found_ips, lock, stop_flag):
     """工作线程，负责生成和测试子域名"""
-    logger.info(f"Worker thread started: {threading.current_thread().name}")  # 添加线程启动日志
-    while len(found_ips) <= 5:  # 检查全局条件
+    logger.info(f"Worker thread started: {threading.current_thread().name}")
+    while len(found_ips) < 1 and not stop_flag.is_set():  # 使用 stop_flag
         subdomain = generate_subdomain()
         url = f"https://{subdomain}"
         status = check_status(url)
 
         if status == 200:
             logger.info(f"{url} is up!")
-            with open(ip_file, 'a') as ip_out:  # 使用追加模式
-                ip_out.write(url + '\n')
-            found_ips.append(url)  # 添加到全局列表
+            with lock:  # 获取锁，确保线程安全
+                with open(ip_file, 'a') as ip_out:
+                    ip_out.write(url + '\n')
+                found_ips.append(url)
+                stop_flag.set()  # 设置 stop_flag，通知其他线程停止
         else:
             logger.debug(f"{url} is down or unreachable.")
 
-    logger.info(f"Worker thread finished: {threading.current_thread().name}")  # 添加线程结束日志
+    logger.info(f"Worker thread finished: {threading.current_thread().name}")
 
 def scan_subdomains():
     ip_file = 'ip.txt'
     ip2_file = 'ip2.txt'
 
+    # 使用线程锁
+    lock = threading.Lock()
+    stop_flag = threading.Event() # 使用 threading.Event
     # 保存 200 状态的域名 (使用线程安全的列表)
-    found_ips = []  # 不需要线程安全的列表，因为不再是所有工作线程共享.
-    logger.info("Starting subdomain scan...")  # 添加扫描开始日志
+    found_ips = []
+
+    logger.info("Starting subdomain scan...")
 
     # 创建线程
     threads = []
     NUM_THREADS = 200
     for _ in range(NUM_THREADS):
-        thread = threading.Thread(target=worker, args=(ip_file, found_ips))
+        thread = threading.Thread(target=worker, args=(ip_file, found_ips, lock, stop_flag))
         threads.append(thread)
         thread.start()
 
@@ -62,9 +67,9 @@ def scan_subdomains():
     for thread in threads:
         thread.join()
 
-    logger.info("Found more than 5 valid domains, stopping the process.")
+    logger.info("Found a valid domain, stopping the process.")
 
 if __name__ == "__main__":
-    logger.info("Script started") # 脚本开始的日志
+    logger.info("Script started")
     scan_subdomains()
-    logger.info("Script completed")  # 脚本结束的日志
+    logger.info("Script completed")
