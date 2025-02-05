@@ -57,7 +57,7 @@ def scan_subdomains():
 
     # 创建线程
     threads = []
-    NUM_THREADS = 200
+    NUM_THREADS = 50
     for _ in range(NUM_THREADS):
         thread = threading.Thread(target=worker, args=(ip_file, found_ips, lock, stop_flag))
         threads.append(thread)
