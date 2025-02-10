@@ -12,7 +12,7 @@ def generate_subdomain():
     prefix_length = random.randint(3, 6)  # 随机生成 3 到 6 的数字
     characters = string.ascii_letters + string.digits  # 所有字母（大小写）和数字
     prefix = ''.join(random.choice(characters) for _ in range(prefix_length))  # 生成随机前缀
-    return f"{prefix}.choreoapps.dev"
+    return f"{prefix}.freewebhostmost.com"
 
 def check_status(url):
     """检查 URL 的状态码"""
