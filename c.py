@@ -60,7 +60,7 @@ def test_sub_paths(ip_file, ip2_file):
             else:
                 logger.debug(f"{sub_url} is down or unreachable.")
 
-def scan_subdomains(max_ips=20, time_limit_minutes=30):
+def scan_subdomains(max_ips=100, time_limit_minutes=30):
     ip_file = 'ip.txt'
     ip2_file = 'ip2.txt'
 
