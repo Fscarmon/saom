@@ -13,7 +13,7 @@ def generate_subdomain():
     prefix_length = random.randint(3, 6)  # 随机生成 3 到 6 的数字
     characters = string.ascii_letters + string.digits  # 所有字母（大小写）和数字
     prefix = ''.join(random.choice(characters) for _ in range(prefix_length))  # 生成随机前缀
-    return f"{prefix}.freewebhostmost.com"
+    return f"{prefix}.serv00.net"
 
 def check_status(url):
     """检查 URL 的状态码"""
@@ -60,7 +60,7 @@ def test_sub_paths(ip_file, ip2_file):
             else:
                 logger.debug(f"{sub_url} is down or unreachable.")
 
-def scan_subdomains(max_ips=100, time_limit_minutes=30):
+def scan_subdomains(max_ips=50, time_limit_minutes=30):
     ip_file = 'ip.txt'
     ip2_file = 'ip2.txt'
 
