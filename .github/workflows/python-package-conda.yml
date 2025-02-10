@@ -2,7 +2,11 @@ name: Scan and Release
 
 on:
   workflow_dispatch: # 允许手动触发
-
+permissions:
+  contents: write
+  issues: write # 创建 release 需要这个
+  pull-requests: write # 创建 release 可能需要这个
+  repository-projects: read # 创建 release 可能需要这个
 jobs:
   scan:
     runs-on: ubuntu-latest
